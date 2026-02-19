@@ -973,6 +973,14 @@
     </div>
 
     <script>
+        // Profanity / inappropriate content detection
+        const profanityWords = [
+            'fuck', 'shit', 'ass', 'damn', 'bitch', 'crap', 'dick', 'cock', 'pussy',
+            'bastard', 'whore', 'slut', 'piss', 'douche', 'cunt', 'twat', 'wank',
+            'bollocks', 'arse', 'suck my', 'blow me', 'stfu', 'wtf', 'lmao', 'gtfo',
+            'nigger', 'nigga', 'faggot', 'retard', 'kill yourself', 'die'
+        ];
+
         // Enhanced spam word database (100+ words)
         const spamWords = [
             'free', 'act now', 'limited time', 'click here', 'buy now', 'order now',
@@ -1103,6 +1111,8 @@
                 scarcityCount: 0,
                 personalizationCount: 0,
                 emojiCount: 0,
+                hasProfanity: false,
+                profanityFound: [],
                 hasQuestion: text.includes('?'),
                 hasNumber: /\d/.test(text),
                 spamWords: [],
@@ -1110,6 +1120,14 @@
                 emotionalWordsFound: [],
                 uncommonWordsFound: []
             };
+
+            // Check for profanity/inappropriate content
+            profanityWords.forEach(word => {
+                if (lowerText.includes(word.toLowerCase())) {
+                    analysis.hasProfanity = true;
+                    analysis.profanityFound.push(word);
+                }
+            });
 
             // Check for spam words
             spamWords.forEach(word => {
@@ -1169,6 +1187,8 @@
             let score = 100;
             
             // Deduct for issues
+            if (analysis.hasProfanity) score -= 60;
+            
             if (analysis.wordCount < 4) score -= 20;
             else if (analysis.wordCount > 12) score -= 15;
             
@@ -1245,6 +1265,14 @@
             let confidence = 'High';
             let reason = 'No promotional or social keywords detected. Likely to land in Primary inbox.';
             let icon = '📥';
+            
+            // Check for profanity — straight to spam
+            if (analysis.hasProfanity) {
+                tab = 'spam';
+                confidence = 'Very High';
+                reason = 'Inappropriate language detected. This email will almost certainly be flagged as spam or blocked entirely.';
+                icon = '🚫';
+            }
             
             // Check for promotional indicators
             const promoKeywords = ['sale', 'discount', 'offer', 'deal', 'buy', 'shop', 'free', 'save', 'promo', '%', 'off'];
