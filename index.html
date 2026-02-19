@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Subject Line Tester | The Lobster Tank</title>
+    <meta name="description" content="Test and optimize your email subject lines. Get instant scores, predicted open rates, and actionable improvements.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px 0;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a6f, #c44569);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .tagline {
+            color: #888;
+            font-size: 0.9rem;
+            font-weight: 300;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #b0b0b0;
+            font-size: 0.9rem;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #ff6b6b;
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255, 107, 107, 0.3);
+        }
+
+        .results {
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .score-display {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.2), rgba(238, 90, 111, 0.2));
+            border: 3px solid;
+            position: relative;
+        }
+
+        .score-circle.excellent { border-color: #4ecdc4; color: #4ecdc4; }
+        .score-circle.good { border-color: #95e1d3; color: #95e1d3; }
+        .score-circle.fair { border-color: #f9ca24; color: #f9ca24; }
+        .score-circle.poor { border-color: #ff6b6b; color: #ff6b6b; }
+
+        .open-rate {
+            font-size: 1.2rem;
+            color: #b0b0b0;
+            margin-top: 10px;
+        }
+
+        .open-rate strong {
+            color: #fff;
+        }
+
+        .factors {
+            display: grid;
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .factor {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid;
+        }
+
+        .factor.pass { border-color: #4ecdc4; }
+        .factor.warning { border-color: #f9ca24; }
+        .factor.fail { border-color: #ff6b6b; }
+
+        .factor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .factor-name {
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .factor-score {
+            font-size: 0.9rem;
+            padding: 3px 10px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .factor-description {
+            font-size: 0.85rem;
+            color: #999;
+        }
+
+        .suggestions {
+            background: rgba(255, 107, 107, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 107, 107, 0.3);
+        }
+
+        .suggestions h3 {
+            color: #ff6b6b;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .suggestions ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .suggestions li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .suggestions li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+
+        .tools-section {
+            margin-top: 50px;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .tool-card {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-5px);
+            border-color: #ff6b6b;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .tool-name {
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .tool-desc {
+            font-size: 0.9rem;
+            color: #999;
+            margin-bottom: 15px;
+        }
+
+        .tool-cta {
+            color: #ff6b6b;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 60px;
+            padding: 30px 0;
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        footer a {
+            color: #ff6b6b;
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2rem;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .tools-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">🦞 The Lobster Tank</div>
+            <div class="tagline">Email Subject Line Tester</div>
+        </header>
+
+        <div class="card">
+            <h2>Test Your Subject Line</h2>
+            <div class="input-group">
+                <label for="subjectLine">Enter your email subject line:</label>
+                <input 
+                    type="text" 
+                    id="subjectLine" 
+                    placeholder="e.g., Don't miss out: 50% off ends tonight! 🔥"
+                    maxlength="150"
+                >
+            </div>
+            <button class="btn" onclick="analyzeSubjectLine()">Analyze Subject Line</button>
+        </div>
+
+        <div class="results" id="results">
+            <div class="card">
+                <div class="score-display">
+                    <div class="score-circle" id="scoreCircle">
+                        <span id="totalScore">0</span>
+                    </div>
+                    <div class="open-rate">
+                        Predicted Open Rate: <strong id="openRate">0%</strong>
+                    </div>
+                </div>
+
+                <h2>Detailed Analysis</h2>
+                <div class="factors" id="factors"></div>
+
+                <div class="suggestions">
+                    <h3>💡 Improvement Suggestions</h3>
+                    <ul id="suggestionsList"></ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="tools-section">
+            <div class="card">
+                <h2>Recommended Email Tools</h2>
+                <div class="tools-grid">
+                    <a href="https://convertkit.com?lmref=ia534A" target="_blank" class="tool-card">
+                        <div class="tool-name">ConvertKit</div>
+                        <div class="tool-desc">Best for creators. Beautiful emails, powerful automation, easy to use.</div>
+                        <div class="tool-cta">Try ConvertKit →</div>
+                    </a>
+                    <a href="https://mailchimp.com/lp/brand-exp/?ds_c=DEPT_AOC_Google_Search_US_EN_Brand_Acquire_Exact_NEW&ds_kids=p79651569690&ds_a_lid=kwd-12802896&gad_source=1" target="_blank" class="tool-card">
+                        <div class="tool-name">Mailchimp</div>
+                        <div class="tool-desc">All-in-one marketing platform. Great for small businesses and e-commerce.</div>
+                        <div class="tool-cta">Start with Mailchimp →</div>
+                    </a>
+                    <a href="https://www.activecampaign.com" target="_blank" class="tool-card">
+                        <div class="tool-name">ActiveCampaign</div>
+                        <div class="tool-desc">Advanced automation and CRM. Perfect for scaling businesses.</div>
+                        <div class="tool-cta">Explore ActiveCampaign →</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Built by <a href="#">The Lobster Tank</a> | Free Email Marketing Tools</p>
+        </footer>
+    </div>
+
+    <script>
+        const spamWords = [
+            'free', 'act now', 'limited time', 'click here', 'buy now', 'order now',
+            'urgent', 'important', 'congratulations', 'winner', 'cash', 'bonus',
+            'guarantee', 'no risk', 'prize', 'save', 'discount', 'deal', 'offer'
+        ];
+
+        const urgencyWords = [
+            'urgent', 'hurry', 'now', 'today', 'tonight', 'soon', 'quick', 'fast',
+            'limited', 'ending', 'expires', 'deadline', 'last chance', 'final'
+        ];
+
+        const scarcityWords = [
+            'limited', 'exclusive', 'only', 'few left', 'running out', 'while supplies',
+            'spots left', 'almost gone', 'selling fast', 'rare'
+        ];
+
+        const personalizationWords = ['you', 'your', 'personalized', 'custom'];
+
+        function analyzeSubjectLine() {
+            const subjectLine = document.getElementById('subjectLine').value.trim();
+            
+            if (!subjectLine) {
+                alert('Please enter a subject line to analyze');
+                return;
+            }
+
+            const analysis = {
+                wordCount: 0,
+                spamScore: 0,
+                emojiCount: 0,
+                urgencyScore: 0,
+                scarcityScore: 0,
+                personalizationScore: 0,
+                questionFormat: false,
+                numberUsage: false,
+                lengthOptimal: false,
+                charCount: 0
+            };
+
+            // Word count
+            const words = subjectLine.split(/\s+/);
+            analysis.wordCount = words.length;
+
+            // Character count
+            analysis.charCount = subjectLine.length;
+
+            // Length optimization (ideal: 6-10 words, 30-50 characters)
+            analysis.lengthOptimal = (analysis.wordCount >= 6 && analysis.wordCount <= 10) || 
+                                     (analysis.charCount >= 30 && analysis.charCount <= 50);
+
+            // Spam trigger words
+            const lowerSubject = subjectLine.toLowerCase();
+            spamWords.forEach(word => {
+                if (lowerSubject.includes(word)) analysis.spamScore++;
+            });
+
+            // Emoji detection
+            const emojiRegex = /[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]/gu;
+            const emojis = subjectLine.match(emojiRegex);
+            analysis.emojiCount = emojis ? emojis.length : 0;
+
+            // Urgency words
+            urgencyWords.forEach(word => {
+                if (lowerSubject.includes(word)) analysis.urgencyScore++;
+            });
+
+            // Scarcity words
+            scarcityWords.forEach(word => {
+                if (lowerSubject.includes(word)) analysis.scarcityScore++;
+            });
+
+            // Personalization
+            personalizationWords.forEach(word => {
+                if (lowerSubject.includes(word)) analysis.personalizationScore++;
+            });
+
+            // Question format
+            analysis.questionFormat = subjectLine.includes('?');
+
+            // Number usage
+            analysis.numberUsage = /\d/.test(subjectLine);
+
+            // Calculate scores and render results
+            renderResults(subjectLine, analysis);
+        }
+
+        function renderResults(subjectLine, analysis) {
+            const factors = [];
+            const suggestions = [];
+            let totalScore = 100;
+
+            // Word Count (ideal: 6-10 words)
+            let wordCountScore = 'pass';
+            let wordCountDesc = `${analysis.wordCount} words - optimal range`;
+            if (analysis.wordCount < 4) {
+                wordCountScore = 'fail';
+                wordCountDesc = `${analysis.wordCount} words - too short`;
+                totalScore -= 15;
+                suggestions.push('Try adding 2-3 more words for better clarity');
+            } else if (analysis.wordCount > 12) {
+                wordCountScore = 'warning';
+                wordCountDesc = `${analysis.wordCount} words - a bit long`;
+                totalScore -= 10;
+                suggestions.push('Consider shortening to 6-10 words for better mobile display');
+            }
+            factors.push({ name: 'Word Count', status: wordCountScore, desc: wordCountDesc });
+
+            // Character Length (ideal: 30-50 characters)
+            let lengthScore = 'pass';
+            let lengthDesc = `${analysis.charCount} characters - good length`;
+            if (analysis.charCount < 20) {
+                lengthScore = 'warning';
+                lengthDesc = `${analysis.charCount} characters - quite short`;
+                totalScore -= 10;
+                suggestions.push('Add more detail to entice opens');
+            } else if (analysis.charCount > 70) {
+                lengthScore = 'warning';
+                lengthDesc = `${analysis.charCount} characters - may get cut off on mobile`;
+                totalScore -= 10;
+                suggestions.push('Shorten to under 50 characters for full visibility on mobile');
+            }
+            factors.push({ name: 'Length Optimization', status: lengthScore, desc: lengthDesc });
+
+            // Spam Triggers
+            let spamScore = 'pass';
+            let spamDesc = 'No spam triggers detected';
+            if (analysis.spamScore > 0) {
+                if (analysis.spamScore >= 3) {
+                    spamScore = 'fail';
+                    totalScore -= 25;
+                    spamDesc = `${analysis.spamScore} spam triggers found - high risk`;
+                    suggestions.push('Remove spam trigger words like "free", "urgent", "act now", etc.');
+                } else {
+                    spamScore = 'warning';
+                    totalScore -= 10;
+                    spamDesc = `${analysis.spamScore} spam trigger(s) found`;
+                    suggestions.push('Reduce use of common spam words to improve deliverability');
+                }
+            }
+            factors.push({ name: 'Spam Trigger Words', status: spamScore, desc: spamDesc });
+
+            // Emoji Usage
+            let emojiScore = 'pass';
+            let emojiDesc = analysis.emojiCount > 0 ? `${analysis.emojiCount} emoji(s) used - good for attention` : 'No emojis';
+            if (analysis.emojiCount === 0) {
+                emojiScore = 'warning';
+                totalScore -= 5;
+                suggestions.push('Consider adding 1-2 relevant emojis to stand out in inboxes');
+            } else if (analysis.emojiCount > 3) {
+                emojiScore = 'fail';
+                totalScore -= 15;
+                emojiDesc = `${analysis.emojiCount} emojis - too many`;
+                suggestions.push('Reduce emoji count to 1-2 for professional appearance');
+            }
+            factors.push({ name: 'Emoji Usage', status: emojiScore, desc: emojiDesc });
+
+            // Urgency/Scarcity
+            const urgencyTotal = analysis.urgencyScore + analysis.scarcityScore;
+            let urgencyScoreStatus = 'warning';
+            let urgencyDesc = 'No urgency or scarcity cues';
+            if (urgencyTotal > 0) {
+                if (urgencyTotal <= 2) {
+                    urgencyScoreStatus = 'pass';
+                    urgencyDesc = 'Good use of urgency/scarcity';
+                    totalScore += 5;
+                } else {
+                    urgencyScoreStatus = 'warning';
+                    urgencyDesc = 'Too much urgency - may seem pushy';
+                    totalScore -= 5;
+                    suggestions.push('Tone down urgency language to avoid seeming desperate');
+                }
+            } else {
+                suggestions.push('Add subtle urgency ("today", "this week") to boost opens');
+            }
+            factors.push({ name: 'Urgency & Scarcity', status: urgencyScoreStatus, desc: urgencyDesc });
+
+            // Personalization
+            let personalScore = 'warning';
+            let personalDesc = 'No personalization detected';
+            if (analysis.personalizationScore > 0) {
+                personalScore = 'pass';
+                personalDesc = 'Personalized language used';
+                totalScore += 5;
+            } else {
+                suggestions.push('Use "you" or "your" to make it personal');
+            }
+            factors.push({ name: 'Personalization', status: personalScore, desc: personalDesc });
+
+            // Question Format
+            let questionScore = 'warning';
+            let questionDesc = 'Not a question';
+            if (analysis.questionFormat) {
+                questionScore = 'pass';
+                questionDesc = 'Question format used - engages curiosity';
+                totalScore += 5;
+            } else {
+                suggestions.push('Try framing as a question to spark curiosity');
+            }
+            factors.push({ name: 'Question Format', status: questionScore, desc: questionDesc });
+
+            // Number Usage
+            let numberScore = 'warning';
+            let numberDesc = 'No numbers used';
+            if (analysis.numberUsage) {
+                numberScore = 'pass';
+                numberDesc = 'Numbers used - attracts attention';
+                totalScore += 5;
+            } else {
+                suggestions.push('Include a number (e.g., "3 tips", "50% off") for specificity');
+            }
+            factors.push({ name: 'Number Usage', status: numberScore, desc: numberDesc });
+
+            // Cap score between 0-100
+            totalScore = Math.max(0, Math.min(100, totalScore));
+
+            // Predicted open rate (rough estimate based on score)
+            let openRate = '';
+            let scoreClass = '';
+            if (totalScore >= 85) {
+                openRate = '25-35%';
+                scoreClass = 'excellent';
+            } else if (totalScore >= 70) {
+                openRate = '20-25%';
+                scoreClass = 'good';
+            } else if (totalScore >= 50) {
+                openRate = '15-20%';
+                scoreClass = 'fair';
+            } else {
+                openRate = '10-15%';
+                scoreClass = 'poor';
+            }
+
+            // Render results
+            document.getElementById('totalScore').textContent = totalScore;
+            document.getElementById('openRate').textContent = openRate;
+            document.getElementById('scoreCircle').className = `score-circle ${scoreClass}`;
+
+            const factorsHTML = factors.map(f => `
+                <div class="factor ${f.status}">
+                    <div class="factor-header">
+                        <span class="factor-name">${f.name}</span>
+                        <span class="factor-score">${f.status === 'pass' ? '✓' : f.status === 'warning' ? '⚠' : '✗'}</span>
+                    </div>
+                    <div class="factor-description">${f.desc}</div>
+                </div>
+            `).join('');
+
+            document.getElementById('factors').innerHTML = factorsHTML;
+
+            if (suggestions.length === 0) {
+                suggestions.push('Great subject line! Keep testing variations to optimize further.');
+            }
+
+            const suggestionsHTML = suggestions.map(s => `<li>${s}</li>`).join('');
+            document.getElementById('suggestionsList').innerHTML = suggestionsHTML;
+
+            // Show results
+            document.getElementById('results').classList.add('show');
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Allow Enter key to submit
+        document.getElementById('subjectLine').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                analyzeSubjectLine();
+            }
+        });
+    </script>
+</body>
+</html>
